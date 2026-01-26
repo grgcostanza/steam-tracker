@@ -1,0 +1,605 @@
+{
+  "timestamp": "2026-01-25_17-25-41",
+  "games": [
+    {
+      "rank": 1,
+      "title": "Subnautica 2",
+      "appId": "1962700",
+      "followers": 256727
+    },
+    {
+      "rank": 2,
+      "title": "Deadlock",
+      "appId": "1422450",
+      "followers": 332551
+    },
+    {
+      "rank": 3,
+      "title": "Light No Fire",
+      "appId": "2719590",
+      "followers": 215985
+    },
+    {
+      "rank": 4,
+      "title": "Resident Evil Requiem",
+      "appId": "3764200",
+      "followers": 119558
+    },
+    {
+      "rank": 5,
+      "title": "Slay the Spire 2",
+      "appId": "2868840",
+      "followers": 77731
+    },
+    {
+      "rank": 6,
+      "title": "Kingmakers",
+      "appId": "2109770",
+      "followers": 96268
+    },
+    {
+      "rank": 7,
+      "title": "Blight: Survival",
+      "appId": "1774880",
+      "followers": 128117
+    },
+    {
+      "rank": 8,
+      "title": "Forza Horizon 6",
+      "appId": "2483190",
+      "followers": 98881
+    },
+    {
+      "rank": 9,
+      "title": "ARK 2",
+      "appId": "2050420",
+      "followers": 143403
+    },
+    {
+      "rank": 10,
+      "title": "Half Sword",
+      "appId": "2397300",
+      "followers": 86816
+    },
+    {
+      "rank": 11,
+      "title": "Unrecord",
+      "appId": "2381520",
+      "followers": 134346
+    },
+    {
+      "rank": 12,
+      "title": "Heroes of Might and Magic: Olden Era",
+      "appId": "3105440",
+      "followers": 128313
+    },
+    {
+      "rank": 13,
+      "title": "Witchbrook",
+      "appId": "1846700",
+      "followers": 97618
+    },
+    {
+      "rank": 14,
+      "title": "Fable",
+      "appId": "2769570",
+      "followers": 68471
+    },
+    {
+      "rank": 15,
+      "title": "Total War: WARHAMMER 40,000",
+      "appId": "4199910",
+      "followers": 79728
+    },
+    {
+      "rank": 16,
+      "title": "SteamDB Unknown App 4165910",
+      "appId": "4165910",
+      "followers": 0
+    },
+    {
+      "rank": 17,
+      "title": "REANIMAL",
+      "appId": "2129530",
+      "followers": 57449
+    },
+    {
+      "rank": 18,
+      "title": "ILL",
+      "appId": "1757350",
+      "followers": 62723
+    },
+    {
+      "rank": 19,
+      "title": "Chrono Odyssey",
+      "appId": "2873440",
+      "followers": 109140
+    },
+    {
+      "rank": 20,
+      "title": "MOUSE: P.I. For Hire",
+      "appId": "2416450",
+      "followers": 56382
+    },
+    {
+      "rank": 21,
+      "title": "SteamDB Unknown App 4165890",
+      "appId": "4165890",
+      "followers": 0
+    },
+    {
+      "rank": 22,
+      "title": "PRAGMATA",
+      "appId": "3357650",
+      "followers": 48125
+    },
+    {
+      "rank": 23,
+      "title": "Crimson Desert",
+      "appId": "3321460",
+      "followers": 64826
+    },
+    {
+      "rank": 24,
+      "title": "Gothic 1 Remake",
+      "appId": "1297900",
+      "followers": 89207
+    },
+    {
+      "rank": 25,
+      "title": "Steam Controller",
+      "appId": "4165870",
+      "followers": 39
+    },
+    {
+      "rank": 26,
+      "title": "Vindictus: Defying Fate",
+      "appId": "2814860",
+      "followers": 87068
+    },
+    {
+      "rank": 27,
+      "title": "Outbound",
+      "appId": "2681030",
+      "followers": 51959
+    },
+    {
+      "rank": 28,
+      "title": "Phantom Blade Zero",
+      "appId": "4115450",
+      "followers": 32487
+    },
+    {
+      "rank": 29,
+      "title": "The Blood of Dawnwalker",
+      "appId": "3751260",
+      "followers": 54579
+    },
+    {
+      "rank": 30,
+      "title": "PUBG: Black Budget",
+      "appId": "4077740",
+      "followers": 109244
+    },
+    {
+      "rank": 31,
+      "title": "Rooted",
+      "appId": "1940080",
+      "followers": 106340
+    },
+    {
+      "rank": 32,
+      "title": "Solarpunk™",
+      "appId": "1805110",
+      "followers": 63081
+    },
+    {
+      "rank": 33,
+      "title": "LEGO® Batman™: Legacy of the Dark Knight",
+      "appId": "2215200",
+      "followers": 29885
+    },
+    {
+      "rank": 34,
+      "title": "Windrose",
+      "appId": "3041230",
+      "followers": 69134
+    },
+    {
+      "rank": 35,
+      "title": "Warhammer 40,000: Dawn of War IV",
+      "appId": "2272360",
+      "followers": 54835
+    },
+    {
+      "rank": 36,
+      "title": "Everwind",
+      "appId": "2253100",
+      "followers": 58563
+    },
+    {
+      "rank": 37,
+      "title": "Tides of Annihilation",
+      "appId": "3292470",
+      "followers": 50510
+    },
+    {
+      "rank": 38,
+      "title": "Tomb Raider: Legacy of Atlantis",
+      "appId": "3558670",
+      "followers": 31629
+    },
+    {
+      "rank": 39,
+      "title": "YAPYAP",
+      "appId": "3834090",
+      "followers": 27499
+    },
+    {
+      "rank": 40,
+      "title": "Paralives",
+      "appId": "1118520",
+      "followers": 163659
+    },
+    {
+      "rank": 41,
+      "title": "over the hill",
+      "appId": "2929250",
+      "followers": 35743
+    },
+    {
+      "rank": 42,
+      "title": "Onimusha: Way of the Sword",
+      "appId": "2638890",
+      "followers": 29740
+    },
+    {
+      "rank": 43,
+      "title": "Operation Lovecraft: Fallen Doll",
+      "appId": "1685960",
+      "followers": 215774
+    },
+    {
+      "rank": 44,
+      "title": "Falling Frontier",
+      "appId": "1280190",
+      "followers": 93276
+    },
+    {
+      "rank": 45,
+      "title": "The Bustling World",
+      "appId": "2724650",
+      "followers": 79703
+    },
+    {
+      "rank": 46,
+      "title": "SAND: Raiders of Sophie",
+      "appId": "1431300",
+      "followers": 64233
+    },
+    {
+      "rank": 47,
+      "title": "Fatekeeper",
+      "appId": "2186990",
+      "followers": 48553
+    },
+    {
+      "rank": 48,
+      "title": "007 First Light",
+      "appId": "3768760",
+      "followers": 37247
+    },
+    {
+      "rank": 49,
+      "title": "Beautiful Light",
+      "appId": "1313230",
+      "followers": 63686
+    },
+    {
+      "rank": 50,
+      "title": "Dead as Disco",
+      "appId": "3404260",
+      "followers": 27029
+    },
+    {
+      "rank": 51,
+      "title": "Persona 4 Revival",
+      "appId": "2963950",
+      "followers": 27482
+    },
+    {
+      "rank": 52,
+      "title": "Nivalis",
+      "appId": "1488490",
+      "followers": 51832
+    },
+    {
+      "rank": 53,
+      "title": "Deep Rock Galactic: Rogue Core",
+      "appId": "2605790",
+      "followers": 61156
+    },
+    {
+      "rank": 54,
+      "title": "KARLSON",
+      "appId": "1228610",
+      "followers": 161372
+    },
+    {
+      "rank": 55,
+      "title": "PVKK: Planetenverteidigungskanonenkommandant",
+      "appId": "2956040",
+      "followers": 42791
+    },
+    {
+      "rank": 56,
+      "title": "The Expanse: Osiris Reborn",
+      "appId": "3727390",
+      "followers": 53103
+    },
+    {
+      "rank": 57,
+      "title": "Marathon",
+      "appId": "3065800",
+      "followers": 53633
+    },
+    {
+      "rank": 58,
+      "title": "Cairn",
+      "appId": "1588550",
+      "followers": 37598
+    },
+    {
+      "rank": 59,
+      "title": "Soulframe",
+      "appId": "4095380",
+      "followers": 33828
+    },
+    {
+      "rank": 60,
+      "title": "Showa American Story",
+      "appId": "1687540",
+      "followers": 54184
+    },
+    {
+      "rank": 61,
+      "title": "REPLACED",
+      "appId": "1663850",
+      "followers": 44420
+    },
+    {
+      "rank": 62,
+      "title": "Nioh 3",
+      "appId": "3681010",
+      "followers": 32056
+    },
+    {
+      "rank": 63,
+      "title": "Haunted Paws",
+      "appId": "2861080",
+      "followers": 34115
+    },
+    {
+      "rank": 64,
+      "title": "Warhammer 40,000: Dark Heresy",
+      "appId": "3710600",
+      "followers": 41036
+    },
+    {
+      "rank": 65,
+      "title": "Railborn",
+      "appId": "2340970",
+      "followers": 39553
+    },
+    {
+      "rank": 66,
+      "title": "State of Decay 3",
+      "appId": "1340720",
+      "followers": 42336
+    },
+    {
+      "rank": 67,
+      "title": "Road to Vostok",
+      "appId": "1963610",
+      "followers": 69878
+    },
+    {
+      "rank": 68,
+      "title": "Low-Budget Repairs",
+      "appId": "3167920",
+      "followers": 43227
+    },
+    {
+      "rank": 69,
+      "title": "MENACE",
+      "appId": "2432860",
+      "followers": 54691
+    },
+    {
+      "rank": 70,
+      "title": "Alkahest",
+      "appId": "3016620",
+      "followers": 44708
+    },
+    {
+      "rank": 71,
+      "title": "CONTROL Resonant",
+      "appId": "3669870",
+      "followers": 22115
+    },
+    {
+      "rank": 72,
+      "title": "Paradise",
+      "appId": "3281420",
+      "followers": 113418
+    },
+    {
+      "rank": 73,
+      "title": "CODE VEIN II",
+      "appId": "2362060",
+      "followers": 26878
+    },
+    {
+      "rank": 74,
+      "title": "Anvil Empires",
+      "appId": "1373910",
+      "followers": 62788
+    },
+    {
+      "rank": 75,
+      "title": "Euro Truck Simulator 2 - Heart of Russia",
+      "appId": "1536500",
+      "followers": 0
+    },
+    {
+      "rank": 76,
+      "title": "Big Walk",
+      "appId": "1478500",
+      "followers": 22122
+    },
+    {
+      "rank": 77,
+      "title": "KYORA",
+      "appId": "3337850",
+      "followers": 30449
+    },
+    {
+      "rank": 78,
+      "title": "Chronicles: Medieval",
+      "appId": "2231020",
+      "followers": 46430
+    },
+    {
+      "rank": 79,
+      "title": "Clockwork Revolution",
+      "appId": "2439280",
+      "followers": 30239
+    },
+    {
+      "rank": 80,
+      "title": "Solasta II",
+      "appId": "2975950",
+      "followers": 35534
+    },
+    {
+      "rank": 81,
+      "title": "Nova Roma",
+      "appId": "2426530",
+      "followers": 34120
+    },
+    {
+      "rank": 82,
+      "title": "Fourteen Years of Flames",
+      "appId": "4228810",
+      "followers": 65973
+    },
+    {
+      "rank": 83,
+      "title": "Hell Let Loose: Vietnam",
+      "appId": "3079210",
+      "followers": 25946
+    },
+    {
+      "rank": 84,
+      "title": "ACE COMBAT 8: WINGS OF THEVE",
+      "appId": "2288340",
+      "followers": 24007
+    },
+    {
+      "rank": 85,
+      "title": "Den of Wolves",
+      "appId": "1818140",
+      "followers": 32223
+    },
+    {
+      "rank": 86,
+      "title": "P.O.N.",
+      "appId": "3864580",
+      "followers": 18759
+    },
+    {
+      "rank": 87,
+      "title": "Streets of Rogue 2",
+      "appId": "2165810",
+      "followers": 34198
+    },
+    {
+      "rank": 88,
+      "title": "Starsand Island",
+      "appId": "2966320",
+      "followers": 29846
+    },
+    {
+      "rank": 89,
+      "title": "Rules of Engagement: The Grey State",
+      "appId": "3978820",
+      "followers": 30301
+    },
+    {
+      "rank": 90,
+      "title": "Crowsworn",
+      "appId": "1614330",
+      "followers": 34592
+    },
+    {
+      "rank": 91,
+      "title": "Killer Bean",
+      "appId": "1597080",
+      "followers": 34778
+    },
+    {
+      "rank": 92,
+      "title": "Derelicts",
+      "appId": "1572000",
+      "followers": 54457
+    },
+    {
+      "rank": 93,
+      "title": "BLACKFROST: The Long Dark 2",
+      "appId": "1586260",
+      "followers": 37732
+    },
+    {
+      "rank": 94,
+      "title": "30 Days on Ship",
+      "appId": "2800370",
+      "followers": 38078
+    },
+    {
+      "rank": 95,
+      "title": "Prison Architect 2",
+      "appId": "1257610",
+      "followers": 36846
+    },
+    {
+      "rank": 96,
+      "title": "Mewgenics",
+      "appId": "686060",
+      "followers": 21370
+    },
+    {
+      "rank": 97,
+      "title": "Holstin",
+      "appId": "2235430",
+      "followers": 29400
+    },
+    {
+      "rank": 98,
+      "title": "Tears of Metal",
+      "appId": "1913120",
+      "followers": 22989
+    },
+    {
+      "rank": 99,
+      "title": "Roadside Research",
+      "appId": "3643170",
+      "followers": 15728
+    },
+    {
+      "rank": 100,
+      "title": "Threads of Time",
+      "appId": "2090210",
+      "followers": 28762
+    }
+  ]
+}

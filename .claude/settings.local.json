@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm run track:*)",
+      "Bash(node tracker.js:*)",
+      "Bash(node enrich-watchlist.js:*)",
+      "Bash(node -e \"const fs = require\\(''fs''\\); const data = fs.readFileSync\\(''temp_games.json'', ''utf-8''\\); const { execSync } = require\\(''child_process''\\); execSync\\(''node tracker.js '' + JSON.stringify\\(data\\), { stdio: ''inherit'' }\\);\")",
+      "Bash(del \"C:\\\\Users\\\\Tyler\\\\OneDrive\\\\Desktop\\\\Claude Projects\\\\SteamDB Tracker\\\\temp_games.json\")",
+      "Bash(dir /a \"C:\\\\Users\\\\Tyler\\\\OneDrive\\\\Desktop\\\\Claude Projects\\\\SteamDB Tracker\")",
+      "Bash(dir /a \"C:\\\\Users\\\\Tyler\\\\OneDrive\\\\Desktop\\\\Claude Projects\\\\SteamDB Tracker\\\\watchlists\")",
+      "Bash(npx playwright install:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git config:*)"
+    ]
+  }
+}
