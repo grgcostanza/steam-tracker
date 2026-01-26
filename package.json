@@ -11,7 +11,6 @@
     "scrape": "node scraper.js"
   },
   "dependencies": {
-    "playwright": "^1.40.0",
     "resend": "^2.0.0"
   },
   "optionalDependencies": {
