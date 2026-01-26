@@ -255,7 +255,7 @@ export async function sendNotification() {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: 'SteamDB Tracker <onboarding@resend.dev>',
+      from: 'SteamDB Tracker <notifications@tyler-matheson.com>',
       to: [emailTo],
       subject: `SteamDB Watchlist Update - ${date}`,
       html: buildEmailHtml(watchlistData),
