@@ -5,7 +5,7 @@ on:
     # Run at 9 AM EST (2 PM UTC) every day
     - cron: '0 14 * * *'
   workflow_dispatch:
-    # Allow manual trigger from GitHub Actions UI
+    # Allows manual trigger from GitHub Actions UI
 
 jobs:
   track:
