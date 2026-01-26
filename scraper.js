@@ -112,12 +112,21 @@ export async function scrapeTop200() {
     console.log(`Scraped ${games.length} games`);
     return games;
   } catch (error) {
-    // Take a screenshot for debugging if it fails
+    // Save debug info if it fails
     try {
-      await page.screenshot({ path: 'debug-screenshot.png' });
+      await page.screenshot({ path: 'debug-screenshot.png', fullPage: true });
       console.log('Debug screenshot saved to debug-screenshot.png');
+
+      const html = await page.content();
+      const fs = await import('fs');
+      fs.writeFileSync('debug-page.html', html);
+      console.log('Debug HTML saved to debug-page.html');
+
+      // Log the page title and URL
+      console.log('Page title:', await page.title());
+      console.log('Page URL:', page.url());
     } catch (e) {
-      // Ignore screenshot errors
+      console.error('Failed to save debug info:', e.message);
     }
     throw error;
   } finally {

@@ -25,15 +25,32 @@ jobs:
         run: npm ci
 
       - name: Install Playwright browsers
-        run: npx playwright install chromium
+        run: npx playwright install chromium --with-deps
 
       - name: Run daily tracker
+        id: tracker
+        continue-on-error: true
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
         run: npm run daily
 
+      - name: Upload debug artifacts on failure
+        if: steps.tracker.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-artifacts
+          path: |
+            debug-screenshot.png
+            debug-page.html
+          if-no-files-found: ignore
+
+      - name: Fail if tracker failed
+        if: steps.tracker.outcome == 'failure'
+        run: exit 1
+
       - name: Commit and push results
+        if: steps.tracker.outcome == 'success'
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
