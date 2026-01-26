@@ -2,8 +2,8 @@ name: Daily SteamDB Tracker
 
 on:
   schedule:
-    # Run at 9 AM EST (2 PM UTC) every day
-    - cron: '0 14 * * *'
+    # Run at 8:30 AM PST (4:30 PM UTC) every day
+    - cron: '30 16 * * *'
   workflow_dispatch:
     # Allows manual trigger from GitHub Actions UI
 
