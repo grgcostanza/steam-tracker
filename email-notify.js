@@ -125,7 +125,7 @@ function buildEmailHtml(watchlistData) {
       html += `
         <table>
           <thead>
-            <tr><th>Rank</th><th>Title</th><th>Followers</th><th>Developer</th><th>Publisher</th></tr>
+            <tr><th>Rank</th><th>Title</th><th>Developer</th><th>Publisher</th></tr>
           </thead>
           <tbody>
       `;
@@ -134,7 +134,6 @@ function buildEmailHtml(watchlistData) {
           <tr>
             <td class="rank">#${game.rank}</td>
             <td>${game.title}</td>
-            <td>${game.followers}</td>
             <td>${game.developer}</td>
             <td>${game.publisher}</td>
           </tr>
@@ -151,7 +150,7 @@ function buildEmailHtml(watchlistData) {
       html += `
         <table>
           <thead>
-            <tr><th>Rank</th><th>Change</th><th>Title</th><th>Followers</th><th>Developer</th></tr>
+            <tr><th>Rank</th><th>Change</th><th>Title</th><th>Developer</th><th>Publisher</th></tr>
           </thead>
           <tbody>
       `;
@@ -161,8 +160,8 @@ function buildEmailHtml(watchlistData) {
             <td class="rank">#${game.currentRank}</td>
             <td class="change">${game.change}</td>
             <td>${game.title}</td>
-            <td>${game.followers}</td>
             <td>${game.developer}</td>
+            <td>${game.publisher}</td>
           </tr>
         `;
       }
@@ -199,8 +198,8 @@ function buildEmailText(watchlistData) {
   text += 'NEW TO TOP 200\n' + '-'.repeat(30) + '\n';
   if (watchlistData.newEntries.length > 0) {
     for (const game of watchlistData.newEntries) {
-      text += `#${game.rank} ${game.title} (${game.followers} followers)\n`;
-      text += `    Developer: ${game.developer}\n\n`;
+      text += `#${game.rank} ${game.title}\n`;
+      text += `    Developer: ${game.developer} | Publisher: ${game.publisher}\n\n`;
     }
   } else {
     text += 'No new entries today.\n\n';
@@ -210,7 +209,7 @@ function buildEmailText(watchlistData) {
   if (watchlistData.risers.length > 0) {
     for (const game of watchlistData.risers) {
       text += `#${game.currentRank} ${game.title} (${game.change} from #${game.previousRank})\n`;
-      text += `    Developer: ${game.developer}\n\n`;
+      text += `    Developer: ${game.developer} | Publisher: ${game.publisher}\n\n`;
     }
   } else {
     text += 'No significant risers today.\n';
