@@ -1,23 +1,28 @@
-# SteamDB Wishlist Tracker
+# Steam Wishlist Tracker
 
-Tracks the top 100 most wishlisted games on Steam and identifies interesting changes.
+Tracks the top 200 most wishlisted games on Steam and identifies interesting changes using Steam's official API.
 
 ## Usage
 
-Simply ask Claude: **"Run the tracker"** or **"Track SteamDB wishlists"**
+The tracker runs automatically via GitHub Actions every Monday at 6:00 AM PST.
 
-Claude will:
-1. Open SteamDB in the browser via Chrome extension
-2. Extract the top 100 most wishlisted games (rank + title)
-3. Compare against the previous run to find changes
-4. For any new entries or risers, search online for developer/publisher info
-5. Generate reports and watchlists automatically
+To run manually:
+```bash
+npm run daily
+```
+
+The script will:
+1. Fetch the top 200 most wishlisted games from Steam's official API
+2. Compare against the previous run to find changes
+3. For any new entries or risers, fetch developer/publisher info from Steam
+4. Generate reports and watchlists automatically
+5. Send email notifications via Resend (if configured)
 
 ## Output
 
-- **reports/**: Contains timestamped markdown reports with all 100 games (rank + title)
+- **reports/**: Contains timestamped markdown reports with all 200 games (rank + title)
 - **watchlists/**: Contains daily watchlists highlighting:
-  - New entries to the top 100 (with developer/publisher)
+  - New entries to the top 200 (with developer/publisher)
   - Games that rose 3+ positions since last run (with developer/publisher)
 
 ## Data Points Tracked
@@ -25,7 +30,7 @@ Claude will:
 ### Full Report
 | Field | Description |
 |-------|-------------|
-| Rank | Current wishlist position (1-100) |
+| Rank | Current wishlist position (1-200) |
 | Title | Game name |
 
 ### Watchlist Only

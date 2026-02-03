@@ -4,6 +4,14 @@ import { spawn } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+// Load .env for local testing
+try {
+  const dotenv = await import('dotenv');
+  dotenv.config();
+} catch (e) {
+  // dotenv not installed or failed to load, rely on environment variables
+}
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -92,12 +100,12 @@ function parseEnrichmentData(trackerOutput) {
 async function main() {
   const startTime = Date.now();
   console.log(`\n${'='.repeat(60)}`);
-  console.log(`SteamDB Daily Tracker - ${new Date().toISOString()}`);
+  console.log(`Steam Daily Tracker - ${new Date().toISOString()}`);
   console.log(`${'='.repeat(60)}\n`);
 
   try {
     // Step 1: Scrape top 200 games
-    console.log('[1/4] Scraping SteamDB...');
+    console.log('[1/4] Scraping Steam API...');
     const games = await scrapeTop200();
 
     if (games.length === 0) {
@@ -131,7 +139,7 @@ async function main() {
               publisher: details.publisher
             });
 
-            // Rate limiting - be nice to SteamDB
+            // Rate limiting - be nice to Steam API
             await new Promise(r => setTimeout(r, 2000));
           } catch (e) {
             console.error(`  Failed to enrich ${game.title}: ${e.message}`);
