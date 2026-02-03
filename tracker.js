@@ -83,7 +83,7 @@ function formatFollowers(followers) {
 
 // Generate markdown report (rank, title, and followers)
 function generateReport(games) {
-  let markdown = `# SteamDB Most Wishlisted Games Report\n\n`;
+  let markdown = `# Steam Most Wishlisted Games Report\n\n`;
   markdown += `**Generated:** ${new Date().toLocaleString()}\n\n`;
   markdown += `| Rank | Title | Followers |\n`;
   markdown += `|------|-------|----------|\n`;

@@ -1,4 +1,3 @@
-import { Resend } from 'resend';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -7,16 +6,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const WATCHLISTS_DIR = path.join(__dirname, 'watchlists');
-
-// Additional recipients to always include
-const ADDITIONAL_RECIPIENTS = [
-  'andrew@makersfund.com',
-  'jiang@makersfund.com',
-  'yoyo@makersfund.com',
-  'alli@makersfund.com',
-  'curtis@makersfund.com',
-  'walter@makersfund.com'
-];
 
 /**
  * Get the most recent watchlist file
@@ -194,55 +183,23 @@ function buildEmailHtml(watchlistData) {
 }
 
 /**
- * Build plain text email from watchlist data
- */
-function buildEmailText(watchlistData) {
-  const date = new Date().toLocaleDateString();
-  let text = `Steam Wishlist Update - ${date}\n${'='.repeat(50)}\n\n`;
-
-  if (watchlistData.isFirstRun) {
-    text += 'This is the first run - baseline established. Future runs will show changes.\n';
-    return text;
-  }
-
-  text += 'NEW TO TOP 200\n' + '-'.repeat(30) + '\n';
-  if (watchlistData.newEntries.length > 0) {
-    for (const game of watchlistData.newEntries) {
-      text += `#${game.rank} ${game.title}\n`;
-      text += `    Developer: ${game.developer} | Publisher: ${game.publisher}\n\n`;
-    }
-  } else {
-    text += 'No new entries today.\n\n';
-  }
-
-  text += 'RISING TITLES (+3 spots)\n' + '-'.repeat(30) + '\n';
-  if (watchlistData.risers.length > 0) {
-    for (const game of watchlistData.risers) {
-      text += `#${game.currentRank} ${game.title} (${game.change} from #${game.previousRank})\n`;
-      text += `    Developer: ${game.developer} | Publisher: ${game.publisher}\n\n`;
-    }
-  } else {
-    text += 'No significant risers today.\n';
-  }
-
-  return text;
-}
-
-/**
- * Send email notification with the latest watchlist
+ * Send email notification with the latest watchlist via Make.com webhook
  */
 export async function sendNotification() {
-  const apiKey = process.env.RESEND_API_KEY;
-  const emailTo = process.env.EMAIL_TO;
+  const webhookUrl = process.env.MAKERS_WEBHOOK_URL;
+  const apiKey = process.env.MAKERS_API_KEY;
+  const recipients = process.env.EMAIL_TO
+    ? process.env.EMAIL_TO.split(',').map(email => email.trim())
+    : ['tyler@makersfund.com', 'alli@makersfund.com'];
 
-  if (!apiKey) {
-    console.log('RESEND_API_KEY not configured, skipping email notification');
-    return { success: false, reason: 'no_api_key' };
+  if (!webhookUrl) {
+    console.log('MAKERS_WEBHOOK_URL not configured, skipping email notification');
+    return { success: false, reason: 'no_webhook_url' };
   }
 
-  if (!emailTo) {
-    console.log('EMAIL_TO not configured, skipping email notification');
-    return { success: false, reason: 'no_recipient' };
+  if (!apiKey) {
+    console.log('MAKERS_API_KEY not configured, skipping email notification');
+    return { success: false, reason: 'no_api_key' };
   }
 
   const watchlist = getLatestWatchlist();
@@ -254,37 +211,43 @@ export async function sendNotification() {
   const content = fs.readFileSync(watchlist.path, 'utf-8');
   const watchlistData = parseWatchlistMarkdown(content);
 
-  const resend = new Resend(apiKey);
-
   const date = new Date().toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric'
   });
 
-  // Combine EMAIL_TO with additional recipients
-  const allRecipients = [emailTo, ...ADDITIONAL_RECIPIENTS];
+  const subject = `Steam Wishlist Update - ${date}`;
+  const emailHTML = buildEmailHtml(watchlistData);
 
   try {
-    const { data, error } = await resend.emails.send({
-      from: 'Steam Wishlist Tracker <notifications@tyler-matheson.com>',
-      to: allRecipients,
-      subject: `Steam Wishlist Update - ${date}`,
-      html: buildEmailHtml(watchlistData),
-      text: buildEmailText(watchlistData)
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-make-apikey': apiKey
+      },
+      body: JSON.stringify({
+        toRecipients: recipients,
+        subject: subject,
+        emailHTML: emailHTML
+      })
     });
 
-    if (error) {
-      console.error('Failed to send email:', error);
-      return { success: false, reason: 'send_failed', error };
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Failed to send to Make.com webhook:', errorText);
+      return { success: false, reason: 'webhook_failed', error: errorText };
     }
 
-    console.log('Email notification sent successfully');
-    console.log(`  To: ${allRecipients.join(', ')}`);
+    const responseText = await response.text();
+    console.log('Email notification sent successfully via Make.com');
+    console.log(`  Recipients: ${recipients.join(', ')}`);
     console.log(`  New entries: ${watchlistData.newEntries.length}`);
     console.log(`  Risers: ${watchlistData.risers.length}`);
+    console.log(`  Webhook response: ${responseText}`);
 
-    return { success: true, emailId: data?.id };
+    return { success: true, response: responseText };
   } catch (error) {
     console.error('Email notification error:', error);
     return { success: false, reason: 'exception', error };
