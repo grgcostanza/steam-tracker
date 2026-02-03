@@ -1,0 +1,37 @@
+name: Test Steam Tracker
+
+on:
+  workflow_dispatch:
+    # Allows manual trigger from GitHub Actions UI
+
+jobs:
+  track:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run daily tracker
+        env:
+          MAKERS_API_KEY: ${{ secrets.MAKERS_API_KEY }}
+          MAKERS_WEBHOOK_URL: ${{ secrets.MAKERS_WEBHOOK_URL }}
+          EMAIL_TO: ['tyler@makersfund.com', 'alli@makersfund.com']
+        run: npm run daily
+
+      - name: Clean up test files
+        run: |
+          # Remove newly created report and watchlist files
+          find reports/ -name "report_*.json" -type f -mmin -10 -delete
+          find reports/ -name "report_*.md" -type f -mmin -10 -delete
+          find watchlists/ -name "watchlist_*.md" -type f -mmin -10 -delete
+          echo "Test files cleaned up successfully"
