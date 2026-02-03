@@ -26,7 +26,8 @@ jobs:
 
       - name: Run daily tracker
         env:
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          MAKERS_API_KEY: ${{ secrets.MAKERS_API_KEY }}
+          MAKERS_WEBHOOK_URL: ${{ secrets.MAKERS_WEBHOOK_URL }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
         run: npm run daily
 
