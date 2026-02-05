@@ -109,11 +109,11 @@ function generateWatchlist(changes, watchlistData) {
   if (changes.newEntries.length === 0) {
     markdown += `*No new entries*\n\n`;
   } else {
-    markdown += `| Rank | Title | Followers | Developer | Publisher |\n`;
-    markdown += `|------|-------|-----------|-----------|----------|\n`;
+    markdown += `| Rank | Title | Followers | App ID | Developer | Publisher |\n`;
+    markdown += `|------|-------|-----------|--------|-----------|----------|\n`;
     for (const game of changes.newEntries) {
       const info = watchlistData?.find(w => w.title === game.title) || {};
-      markdown += `| ${game.rank} | ${game.title} | ${formatFollowers(game.followers)} | ${info.developer || 'Unknown'} | ${info.publisher || 'Unknown'} |\n`;
+      markdown += `| ${game.rank} | ${game.title} | ${formatFollowers(game.followers)} | ${game.appId} | ${info.developer || 'Unknown'} | ${info.publisher || 'Unknown'} |\n`;
     }
     markdown += `\n`;
   }
@@ -122,11 +122,11 @@ function generateWatchlist(changes, watchlistData) {
   if (changes.risers.length === 0) {
     markdown += `*No significant risers*\n\n`;
   } else {
-    markdown += `| Current Rank | Previous Rank | Change | Title | Followers | Developer | Publisher |\n`;
-    markdown += `|--------------|---------------|--------|-------|-----------|-----------|----------|\n`;
+    markdown += `| Current Rank | Previous Rank | Change | Title | Followers | App ID | Developer | Publisher |\n`;
+    markdown += `|--------------|---------------|--------|-------|-----------|--------|-----------|----------|\n`;
     for (const game of changes.risers) {
       const info = watchlistData?.find(w => w.title === game.title) || {};
-      markdown += `| ${game.rank} | ${game.previousRank} | +${game.change} | ${game.title} | ${formatFollowers(game.followers)} | ${info.developer || 'Unknown'} | ${info.publisher || 'Unknown'} |\n`;
+      markdown += `| ${game.rank} | ${game.previousRank} | +${game.change} | ${game.title} | ${formatFollowers(game.followers)} | ${game.appId} | ${info.developer || 'Unknown'} | ${info.publisher || 'Unknown'} |\n`;
     }
   }
 

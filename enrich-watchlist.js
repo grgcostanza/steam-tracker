@@ -46,18 +46,18 @@ function enrichWatchlist(enrichmentData) {
   const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
   // Pattern to match a row with this title and "Unknown" developer/publisher
-  // Format: | rank | title | followers | Unknown | Unknown |
-  // or: | rank | prevRank | change | title | followers | Unknown | Unknown |
+  // Format: | rank | title | followers | appId | Unknown | Unknown |
+  // or: | rank | prevRank | change | title | followers | appId | Unknown | Unknown |
 
-  // For new entries table (5 columns: rank, title, followers, dev, pub)
+  // For new entries table (6 columns: rank, title, followers, appId, dev, pub)
   const newEntryPattern = new RegExp(
-    `(\\|\\s*\\d+\\s*\\|\\s*${escapedTitle}\\s*\\|\\s*[\\d,N/A]+\\s*\\|)\\s*Unknown\\s*\\|\\s*Unknown\\s*\\|`,
+    `(\\|\\s*\\d+\\s*\\|\\s*${escapedTitle}\\s*\\|\\s*[\\d,N/A]+\\s*\\|\\s*\\d+\\s*\\|)\\s*Unknown\\s*\\|\\s*Unknown\\s*\\|`,
     'g'
   );
 
-  // For risers table (7 columns: rank, prevRank, change, title, followers, dev, pub)
+  // For risers table (8 columns: rank, prevRank, change, title, followers, appId, dev, pub)
   const riserPattern = new RegExp(
-    `(\\|\\s*\\d+\\s*\\|\\s*\\d+\\s*\\|\\s*\\+\\d+\\s*\\|\\s*${escapedTitle}\\s*\\|\\s*[\\d,N/A]+\\s*\\|)\\s*Unknown\\s*\\|\\s*Unknown\\s*\\|`,
+    `(\\|\\s*\\d+\\s*\\|\\s*\\d+\\s*\\|\\s*\\+\\d+\\s*\\|\\s*${escapedTitle}\\s*\\|\\s*[\\d,N/A]+\\s*\\|\\s*\\d+\\s*\\|)\\s*Unknown\\s*\\|\\s*Unknown\\s*\\|`,
     'g'
   );
 

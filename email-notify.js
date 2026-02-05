@@ -37,38 +37,42 @@ function parseWatchlistMarkdown(content) {
   };
 
   // Parse New to Top 200 section
+  // Column order: Rank | Title | Followers | App ID | Developer | Publisher
   const newEntriesMatch = content.match(/## New to Top (?:100|200)\n\n([\s\S]*?)(?=## Rising|$)/);
   if (newEntriesMatch && !newEntriesMatch[1].includes('No new entries')) {
     const rows = newEntriesMatch[1].match(/\| \d+ \|[^\n]+/g) || [];
     for (const row of rows) {
       const cells = row.split('|').map(c => c.trim()).filter(Boolean);
-      if (cells.length >= 4) {
+      if (cells.length >= 5) {
         result.newEntries.push({
           rank: cells[0],
           title: cells[1],
           followers: cells[2],
-          developer: cells[3] || 'Unknown',
-          publisher: cells[4] || cells[3] || 'Unknown'
+          appId: cells[3],
+          developer: cells[4] || 'Unknown',
+          publisher: cells[5] || cells[4] || 'Unknown'
         });
       }
     }
   }
 
   // Parse Rising Titles section
+  // Column order: Current Rank | Previous Rank | Change | Title | Followers | App ID | Developer | Publisher
   const risersMatch = content.match(/## Rising Titles[^\n]*\n\n([\s\S]*?)$/);
   if (risersMatch && !risersMatch[1].includes('No significant risers')) {
     const rows = risersMatch[1].match(/\| \d+ \|[^\n]+/g) || [];
     for (const row of rows) {
       const cells = row.split('|').map(c => c.trim()).filter(Boolean);
-      if (cells.length >= 5) {
+      if (cells.length >= 6) {
         result.risers.push({
           currentRank: cells[0],
           previousRank: cells[1],
           change: cells[2],
           title: cells[3],
           followers: cells[4],
-          developer: cells[5] || 'Unknown',
-          publisher: cells[6] || cells[5] || 'Unknown'
+          appId: cells[5],
+          developer: cells[6] || 'Unknown',
+          publisher: cells[7] || cells[6] || 'Unknown'
         });
       }
     }
@@ -100,6 +104,8 @@ function buildEmailHtml(watchlistData) {
       tr:hover { background-color: #f1f1f1; }
       .rank { font-weight: bold; color: #4a90d9; }
       .change { color: #28a745; font-weight: bold; }
+      a { color: #1a73e8; text-decoration: none; }
+      a:hover { text-decoration: underline; }
       .no-changes { color: #666; font-style: italic; padding: 20px; background: #f9f9f9; border-radius: 5px; }
       .first-run { color: #666; font-style: italic; padding: 20px; background: #fff3cd; border-radius: 5px; }
       .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 0.9em; }
@@ -129,10 +135,11 @@ function buildEmailHtml(watchlistData) {
           <tbody>
       `;
       for (const game of watchlistData.newEntries) {
+        const storeLink = game.appId ? `https://store.steampowered.com/app/${game.appId}` : '#';
         html += `
           <tr>
             <td class="rank">#${game.rank}</td>
-            <td>${game.title}</td>
+            <td><a href="${storeLink}">${game.title}</a></td>
             <td>${game.developer}</td>
             <td>${game.publisher}</td>
           </tr>
@@ -154,11 +161,12 @@ function buildEmailHtml(watchlistData) {
           <tbody>
       `;
       for (const game of watchlistData.risers) {
+        const storeLink = game.appId ? `https://store.steampowered.com/app/${game.appId}` : '#';
         html += `
           <tr>
             <td class="rank">#${game.currentRank}</td>
             <td class="change">${game.change}</td>
-            <td>${game.title}</td>
+            <td><a href="${storeLink}">${game.title}</a></td>
             <td>${game.developer}</td>
             <td>${game.publisher}</td>
           </tr>
