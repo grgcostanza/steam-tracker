@@ -1,0 +1,186 @@
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const WATCHLISTS_DIR = path.join(__dirname, 'watchlists');
+
+/**
+ * Check if a game is potentially self-published by comparing developer and publisher names.
+ * Normalizes names by stripping common suffixes (Inc, LLC, Ltd, etc.) and comparing case-insensitively.
+ */
+export function isSelfPublished(developer, publisher) {
+  if (!developer || !publisher) return false;
+  if (developer === 'Unknown' || publisher === 'Unknown') return false;
+
+  const normalize = (s) => s.toLowerCase()
+    .replace(/\s*(inc\.?|llc\.?|ltd\.?|co\.?|corp\.?|gmbh|s\.?r\.?l\.?|studio[s]?|game[s]?|entertainment|interactive)\s*$/i, '')
+    .replace(/,\s*$/, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  return normalize(developer) === normalize(publisher);
+}
+
+/**
+ * Call Claude API with web search to verify self-publishing status and find contact info.
+ *
+ * Returns: { selfPublished: boolean, contactMethod: string, personName: string }
+ */
+export async function researchContact(title, developer, appId) {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    console.log('  ANTHROPIC_API_KEY not set, skipping contact research');
+    return { selfPublished: false, contactMethod: '-', personName: '' };
+  }
+
+  const prompt = `Research the video game "${title}" by "${developer}" (Steam App ID: ${appId}).
+
+I need you to determine two things:
+
+1. SELF-PUBLISHING VERIFICATION: Is "${developer}" truly an independent, self-publishing game studio?
+   - Check if they have a parent company (e.g., owned by Tencent, Embracer, Sony, Microsoft, NetEase, etc.)
+   - Check if they received significant funding from or are publishing through a larger entity
+   - A studio is self-published ONLY if they are genuinely independent with no major corporate parent or investor
+   - Major publishers like Square Enix, SEGA, EA, Ubisoft, Capcom, Bandai Namco, etc. are NOT self-published
+   - If you cannot determine ownership with confidence, mark as NOT self-published
+
+2. CONTACT RESEARCH (only if truly self-published):
+   Find the best way to contact the developer. Search in this priority order:
+   a. Personal email of the CEO, founder, or co-founder
+   b. LinkedIn profile URL of the CEO, founder, or co-founder
+   c. General studio contact email (e.g., contact@studio.com, hello@studio.com)
+   d. Email or LinkedIn of another key team member
+   e. Discord server invite link
+
+   Look at the studio's official website, social media, press kits, and LinkedIn pages.
+
+You MUST respond in EXACTLY this JSON format with no other text, no markdown, no code fences:
+{"selfPublished": true, "reasoning": "brief explanation of why self-published or not", "contactMethod": "the actual contact info found or -", "contactType": "founder_email|linkedin|studio_email|member_email|discord|none", "personName": "Full Name of the person if applicable, or empty string"}
+
+If NOT self-published, use:
+{"selfPublished": false, "reasoning": "brief explanation", "contactMethod": "-", "contactType": "none", "personName": ""}`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1024,
+        tools: [{
+          type: 'web_search_20250305',
+          name: 'web_search',
+          max_uses: 5
+        }],
+        messages: [{
+          role: 'user',
+          content: prompt
+        }]
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Claude API returned ${response.status}: ${errorText}`);
+    }
+
+    const data = await response.json();
+
+    // Extract the last text block from Claude's response (the final answer after web searches)
+    const textBlocks = data.content.filter(b => b.type === 'text');
+    const textBlock = textBlocks[textBlocks.length - 1];
+    if (!textBlock) {
+      throw new Error('No text response from Claude');
+    }
+
+    // Parse JSON from the response, handling potential extra text
+    let jsonStr = textBlock.text.trim();
+    const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error('No JSON found in Claude response');
+    }
+
+    const result = JSON.parse(jsonMatch[0]);
+    return {
+      selfPublished: result.selfPublished === true,
+      contactMethod: result.contactMethod || '-',
+      contactType: result.contactType || 'none',
+      personName: result.personName || ''
+    };
+
+  } catch (error) {
+    console.error(`  Contact research failed for ${title}: ${error.message}`);
+    return { selfPublished: false, contactMethod: '-', contactType: 'none', personName: '' };
+  }
+}
+
+/**
+ * Get the most recent watchlist file
+ */
+function getLatestWatchlist() {
+  if (!fs.existsSync(WATCHLISTS_DIR)) return null;
+
+  const files = fs.readdirSync(WATCHLISTS_DIR)
+    .filter(f => f.endsWith('.md'))
+    .sort()
+    .reverse();
+
+  if (files.length === 0) return null;
+
+  return path.join(WATCHLISTS_DIR, files[0]);
+}
+
+/**
+ * Update the Contact Method column in the latest watchlist for a given game title.
+ */
+export function updateWatchlistContact(title, contactMethod) {
+  const watchlistPath = getLatestWatchlist();
+
+  if (!watchlistPath) {
+    console.error('No watchlist found to update contact info');
+    return { updated: false };
+  }
+
+  let content = fs.readFileSync(watchlistPath, 'utf-8');
+
+  // Escape special regex characters in title
+  const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  // Escape special regex characters in contactMethod for replacement safety
+  const safeContact = contactMethod.replace(/\$/g, '$$$$');
+
+  // For new entries table (7 columns: rank, title, followers, appId, dev, pub, contact)
+  // Match the row and capture everything up to the last column
+  const newEntryPattern = new RegExp(
+    `(\\|\\s*\\d+\\s*\\|\\s*${escapedTitle}\\s*\\|\\s*[^|]+\\|\\s*\\d+\\s*\\|\\s*[^|]+\\|\\s*[^|]+\\|)\\s*-\\s*\\|`,
+    'g'
+  );
+
+  // For risers table (9 columns: rank, prevRank, change, title, followers, appId, dev, pub, contact)
+  const riserPattern = new RegExp(
+    `(\\|\\s*\\d+\\s*\\|\\s*\\d+\\s*\\|\\s*\\+\\d+\\s*\\|\\s*${escapedTitle}\\s*\\|\\s*[^|]+\\|\\s*\\d+\\s*\\|\\s*[^|]+\\|\\s*[^|]+\\|)\\s*-\\s*\\|`,
+    'g'
+  );
+
+  const originalContent = content;
+
+  content = content.replace(newEntryPattern, `$1 ${safeContact} |`);
+  content = content.replace(riserPattern, `$1 ${safeContact} |`);
+
+  const updated = content !== originalContent;
+
+  if (updated) {
+    fs.writeFileSync(watchlistPath, content);
+    console.log(`    Updated contact for: ${title} -> ${contactMethod}`);
+  } else {
+    console.log(`    No match found for contact update: ${title}`);
+  }
+
+  return { updated, watchlistPath };
+}

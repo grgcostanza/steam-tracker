@@ -37,7 +37,7 @@ function parseWatchlistMarkdown(content) {
   };
 
   // Parse New to Top 200 section
-  // Column order: Rank | Title | Followers | App ID | Developer | Publisher
+  // Column order: Rank | Title | Followers | App ID | Developer | Publisher | Contact Method
   const newEntriesMatch = content.match(/## New to Top (?:100|200)\n\n([\s\S]*?)(?=## Rising|$)/);
   if (newEntriesMatch && !newEntriesMatch[1].includes('No new entries')) {
     const rows = newEntriesMatch[1].match(/\| \d+ \|[^\n]+/g) || [];
@@ -50,14 +50,15 @@ function parseWatchlistMarkdown(content) {
           followers: cells[2],
           appId: cells[3],
           developer: cells[4] || 'Unknown',
-          publisher: cells[5] || cells[4] || 'Unknown'
+          publisher: cells[5] || cells[4] || 'Unknown',
+          contactMethod: cells[6] || '-'
         });
       }
     }
   }
 
   // Parse Rising Titles section
-  // Column order: Current Rank | Previous Rank | Change | Title | Followers | App ID | Developer | Publisher
+  // Column order: Current Rank | Previous Rank | Change | Title | Followers | App ID | Developer | Publisher | Contact Method
   const risersMatch = content.match(/## Rising Titles[^\n]*\n\n([\s\S]*?)$/);
   if (risersMatch && !risersMatch[1].includes('No significant risers')) {
     const rows = risersMatch[1].match(/\| \d+ \|[^\n]+/g) || [];
@@ -72,13 +73,42 @@ function parseWatchlistMarkdown(content) {
           followers: cells[4],
           appId: cells[5],
           developer: cells[6] || 'Unknown',
-          publisher: cells[7] || cells[6] || 'Unknown'
+          publisher: cells[7] || cells[6] || 'Unknown',
+          contactMethod: cells[8] || '-'
         });
       }
     }
   }
 
   return result;
+}
+
+/**
+ * Format contact method as a clickable HTML link when applicable
+ */
+function formatContact(contact) {
+  if (!contact || contact === '-') return '-';
+  // Handle "Name: value" format
+  const colonIdx = contact.indexOf(': ');
+  if (colonIdx > 0) {
+    const name = contact.substring(0, colonIdx);
+    const value = contact.substring(colonIdx + 2);
+    if (value.includes('@')) {
+      return `${name}: <a href="mailto:${value}">${value}</a>`;
+    }
+    if (value.includes('linkedin.com') || value.includes('discord.gg') || value.startsWith('http')) {
+      return `${name}: <a href="${value.startsWith('http') ? value : 'https://' + value}">${value}</a>`;
+    }
+    return contact;
+  }
+  // Handle bare values
+  if (contact.includes('@')) {
+    return `<a href="mailto:${contact}">${contact}</a>`;
+  }
+  if (contact.includes('linkedin.com') || contact.includes('discord.gg') || contact.startsWith('http')) {
+    return `<a href="${contact.startsWith('http') ? contact : 'https://' + contact}">${contact}</a>`;
+  }
+  return contact;
 }
 
 /**
@@ -130,7 +160,7 @@ function buildEmailHtml(watchlistData) {
       html += `
         <table>
           <thead>
-            <tr><th>Rank</th><th>Title</th><th>Developer</th><th>Publisher</th></tr>
+            <tr><th>Rank</th><th>Title</th><th>Developer</th><th>Publisher</th><th>Contact</th></tr>
           </thead>
           <tbody>
       `;
@@ -142,6 +172,7 @@ function buildEmailHtml(watchlistData) {
             <td><a href="${storeLink}">${game.title}</a></td>
             <td>${game.developer}</td>
             <td>${game.publisher}</td>
+            <td>${formatContact(game.contactMethod)}</td>
           </tr>
         `;
       }
@@ -156,7 +187,7 @@ function buildEmailHtml(watchlistData) {
       html += `
         <table>
           <thead>
-            <tr><th>Rank</th><th>Change</th><th>Title</th><th>Developer</th><th>Publisher</th></tr>
+            <tr><th>Rank</th><th>Change</th><th>Title</th><th>Developer</th><th>Publisher</th><th>Contact</th></tr>
           </thead>
           <tbody>
       `;
@@ -169,6 +200,7 @@ function buildEmailHtml(watchlistData) {
             <td><a href="${storeLink}">${game.title}</a></td>
             <td>${game.developer}</td>
             <td>${game.publisher}</td>
+            <td>${formatContact(game.contactMethod)}</td>
           </tr>
         `;
       }

@@ -26,6 +26,7 @@ jobs:
           MAKERS_API_KEY: ${{ secrets.MAKERS_API_KEY }}
           MAKERS_WEBHOOK_URL: ${{ secrets.MAKERS_WEBHOOK_URL }}
           EMAIL_TO: 'tyler@makersfund.com, alli@makersfund.com'
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: npm run daily
         
       - name: Clean up test files

@@ -1,5 +1,6 @@
 import { scrapeTop200, scrapeGameDetails } from './scraper.js';
 import { sendNotification } from './email-notify.js';
+import { isSelfPublished, researchContact, updateWatchlistContact } from './contact-research.js';
 import { spawn } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -105,7 +106,7 @@ async function main() {
 
   try {
     // Step 1: Scrape top 200 games
-    console.log('[1/4] Scraping Steam API...');
+    console.log('[1/5] Scraping Steam API...');
     const games = await scrapeTop200();
 
     if (games.length === 0) {
@@ -115,13 +116,15 @@ async function main() {
     console.log(`  Scraped ${games.length} games\n`);
 
     // Step 2: Run tracker
-    console.log('[2/4] Running tracker...');
+    console.log('[2/5] Running tracker...');
     const trackerOutput = await runTracker(JSON.stringify(games));
     console.log('');
 
     // Step 3: Enrich watchlist items with developer/publisher info
-    console.log('[3/4] Enriching watchlist...');
+    console.log('[3/5] Enriching watchlist...');
     const gamesToEnrich = parseEnrichmentData(trackerOutput);
+
+    const enrichedGames = [];
 
     if (gamesToEnrich.length > 0) {
       console.log(`  Found ${gamesToEnrich.length} games to enrich\n`);
@@ -139,6 +142,13 @@ async function main() {
               publisher: details.publisher
             });
 
+            enrichedGames.push({
+              title: game.title,
+              appId: game.appId,
+              developer: details.developer,
+              publisher: details.publisher
+            });
+
             // Rate limiting - be nice to Steam API
             await new Promise(r => setTimeout(r, 2000));
           } catch (e) {
@@ -150,8 +160,54 @@ async function main() {
       console.log('  No games need enrichment\n');
     }
 
-    // Step 4: Send email notification
-    console.log('[4/4] Sending email notification...');
+    // Step 4: Contact research for potentially self-published games
+    console.log('[4/5] Researching contacts for self-published studios...');
+
+    if (enrichedGames.length > 0 && process.env.ANTHROPIC_API_KEY) {
+      const selfPublishedCandidates = enrichedGames.filter(g =>
+        isSelfPublished(g.developer, g.publisher)
+      );
+
+      if (selfPublishedCandidates.length > 0) {
+        const maxLookups = parseInt(process.env.MAX_CONTACT_LOOKUPS || '10', 10);
+        const toResearch = selfPublishedCandidates.slice(0, maxLookups);
+
+        console.log(`  Found ${selfPublishedCandidates.length} potentially self-published games (researching up to ${maxLookups})\n`);
+
+        for (const game of toResearch) {
+          try {
+            console.log(`  Researching: ${game.title} (${game.developer})`);
+            const contactInfo = await researchContact(game.title, game.developer, game.appId);
+
+            if (contactInfo.selfPublished && contactInfo.contactMethod !== '-') {
+              const displayContact = contactInfo.personName
+                ? `${contactInfo.personName}: ${contactInfo.contactMethod}`
+                : contactInfo.contactMethod;
+
+              updateWatchlistContact(game.title, displayContact);
+            } else if (!contactInfo.selfPublished) {
+              console.log(`    Not self-published: ${game.title}`);
+            } else {
+              console.log(`    No contact info found for: ${game.title}`);
+            }
+
+            // Rate limiting for Claude API
+            await new Promise(r => setTimeout(r, 3000));
+          } catch (e) {
+            console.error(`  Contact research failed for ${game.title}: ${e.message}`);
+          }
+        }
+      } else {
+        console.log('  No self-published candidates found\n');
+      }
+    } else if (!process.env.ANTHROPIC_API_KEY) {
+      console.log('  ANTHROPIC_API_KEY not set, skipping contact research\n');
+    } else {
+      console.log('  No enriched games to research\n');
+    }
+
+    // Step 5: Send email notification
+    console.log('[5/5] Sending email notification...');
     const emailResult = await sendNotification();
 
     if (emailResult.success) {

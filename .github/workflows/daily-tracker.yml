@@ -29,6 +29,7 @@ jobs:
           MAKERS_API_KEY: ${{ secrets.MAKERS_API_KEY }}
           MAKERS_WEBHOOK_URL: ${{ secrets.MAKERS_WEBHOOK_URL }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: npm run daily
 
       - name: Commit and push results
