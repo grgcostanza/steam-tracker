@@ -64,6 +64,7 @@ If NOT self-published, use:
 {"selfPublished": false, "reasoning": "brief explanation", "contactMethod": "-", "contactType": "none", "personName": ""}`;
 
   try {
+    console.log(`    Calling Claude API for: ${title}`);
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -72,7 +73,7 @@ If NOT self-published, use:
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: 1024,
         tools: [{
           type: 'web_search_20250305',
@@ -88,26 +89,38 @@ If NOT self-published, use:
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Claude API returned ${response.status}: ${errorText}`);
+      console.error(`    API error ${response.status}: ${errorText.substring(0, 500)}`);
+      throw new Error(`Claude API returned ${response.status}: ${errorText.substring(0, 200)}`);
     }
 
     const data = await response.json();
+    console.log(`    API response received - stop_reason: ${data.stop_reason}, content blocks: ${data.content?.length || 0}`);
+
+    // Log web search usage if available
+    if (data.usage?.server_tool_use?.web_search_requests) {
+      console.log(`    Web searches performed: ${data.usage.server_tool_use.web_search_requests}`);
+    }
 
     // Extract the last text block from Claude's response (the final answer after web searches)
     const textBlocks = data.content.filter(b => b.type === 'text');
-    const textBlock = textBlocks[textBlocks.length - 1];
-    if (!textBlock) {
-      throw new Error('No text response from Claude');
+    if (textBlocks.length === 0) {
+      const blockTypes = data.content.map(b => b.type).join(', ');
+      throw new Error(`No text blocks in response. Block types: ${blockTypes}`);
     }
+
+    const textBlock = textBlocks[textBlocks.length - 1];
 
     // Parse JSON from the response, handling potential extra text
     let jsonStr = textBlock.text.trim();
     const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
+      console.error(`    Raw response text: ${jsonStr.substring(0, 300)}`);
       throw new Error('No JSON found in Claude response');
     }
 
     const result = JSON.parse(jsonMatch[0]);
+    console.log(`    Result: selfPublished=${result.selfPublished}, contactType=${result.contactType}, reasoning=${(result.reasoning || '').substring(0, 100)}`);
+
     return {
       selfPublished: result.selfPublished === true,
       contactMethod: result.contactMethod || '-',

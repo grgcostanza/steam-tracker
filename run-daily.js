@@ -162,6 +162,8 @@ async function main() {
 
     // Step 4: Contact research for potentially self-published games
     console.log('[4/5] Researching contacts for self-published studios...');
+    console.log(`  Enriched games count: ${enrichedGames.length}`);
+    console.log(`  ANTHROPIC_API_KEY set: ${!!process.env.ANTHROPIC_API_KEY}`);
 
     if (enrichedGames.length > 0 && process.env.ANTHROPIC_API_KEY) {
       const selfPublishedCandidates = enrichedGames.filter(g =>
