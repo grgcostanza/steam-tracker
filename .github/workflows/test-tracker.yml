@@ -27,8 +27,22 @@ jobs:
           MAKERS_WEBHOOK_URL: ${{ secrets.MAKERS_WEBHOOK_URL }}
           EMAIL_TO: 'tyler@makersfund.com, alli@makersfund.com'
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: npm run daily
-        
+        run: npm run daily 2>&1 | tee tracker-output.log
+
+      - name: Save latest watchlist for debugging
+        if: always()
+        run: |
+          echo "=== Latest watchlist ===" >> tracker-output.log
+          cat watchlists/$(ls -t watchlists/ | head -1) >> tracker-output.log 2>/dev/null || echo "No watchlist found" >> tracker-output.log
+
+      - name: Upload debug logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tracker-debug-logs
+          path: tracker-output.log
+          retention-days: 3
+
       - name: Clean up test files
         run: |
           # Remove newly created report and watchlist files
