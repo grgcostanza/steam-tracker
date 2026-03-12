@@ -135,6 +135,48 @@ If NOT self-published, use:
 }
 
 /**
+ * Parse the latest watchlist and return all games with their developer/publisher info.
+ * This reads the markdown table directly, so it works regardless of how dev/pub was populated.
+ */
+export function getWatchlistGames() {
+  const watchlistPath = getLatestWatchlist();
+  if (!watchlistPath) return [];
+
+  const content = fs.readFileSync(watchlistPath, 'utf-8');
+  const games = [];
+
+  // Parse new entries table (7 columns: rank, title, followers, appId, dev, pub, contact)
+  const newEntryRowRegex = /\|\s*(\d+)\s*\|\s*([^|]+?)\s*\|\s*[^|]+\|\s*(\d+)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]*?)\s*\|/g;
+  // Parse risers table (9 columns: rank, prevRank, change, title, followers, appId, dev, pub, contact)
+  const riserRowRegex = /\|\s*\d+\s*\|\s*\d+\s*\|\s*\+\d+\s*\|\s*([^|]+?)\s*\|\s*[^|]+\|\s*(\d+)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]*?)\s*\|/g;
+
+  // Split content into sections
+  const sections = content.split(/^## /m);
+
+  for (const section of sections) {
+    if (section.startsWith('New to Top 200')) {
+      let match;
+      while ((match = newEntryRowRegex.exec(section)) !== null) {
+        const [, , title, appId, developer, publisher, contact] = match;
+        if (title !== 'Title' && developer !== 'Developer') { // skip header
+          games.push({ title: title.trim(), appId, developer: developer.trim(), publisher: publisher.trim(), contact: contact.trim() });
+        }
+      }
+    } else if (section.startsWith('Rising Titles')) {
+      let match;
+      while ((match = riserRowRegex.exec(section)) !== null) {
+        const [, title, appId, developer, publisher, contact] = match;
+        if (title !== 'Title' && developer !== 'Developer') { // skip header
+          games.push({ title: title.trim(), appId, developer: developer.trim(), publisher: publisher.trim(), contact: contact.trim() });
+        }
+      }
+    }
+  }
+
+  return games;
+}
+
+/**
  * Get the most recent watchlist file
  */
 function getLatestWatchlist() {

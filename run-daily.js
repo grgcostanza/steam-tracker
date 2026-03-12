@@ -1,6 +1,6 @@
 import { scrapeTop200, scrapeGameDetails } from './scraper.js';
 import { sendNotification } from './email-notify.js';
-import { isSelfPublished, researchContact, updateWatchlistContact } from './contact-research.js';
+import { isSelfPublished, researchContact, updateWatchlistContact, getWatchlistGames } from './contact-research.js';
 import { spawn } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -162,11 +162,20 @@ async function main() {
 
     // Step 4: Contact research for potentially self-published games
     console.log('[4/5] Researching contacts for self-published studios...');
-    console.log(`  Enriched games count: ${enrichedGames.length}`);
     console.log(`  ANTHROPIC_API_KEY set: ${!!process.env.ANTHROPIC_API_KEY}`);
 
-    if (enrichedGames.length > 0 && process.env.ANTHROPIC_API_KEY) {
-      const selfPublishedCandidates = enrichedGames.filter(g =>
+    // Read all games from the watchlist directly (not dependent on enrichment step)
+    const watchlistGames = getWatchlistGames();
+    console.log(`  Watchlist games found: ${watchlistGames.length}`);
+
+    // Only research games that don't already have contact info
+    const gamesNeedingContact = watchlistGames.filter(g =>
+      g.contact === '-' && g.developer !== 'Unknown' && g.publisher !== 'Unknown'
+    );
+    console.log(`  Games needing contact research: ${gamesNeedingContact.length}`);
+
+    if (gamesNeedingContact.length > 0 && process.env.ANTHROPIC_API_KEY) {
+      const selfPublishedCandidates = gamesNeedingContact.filter(g =>
         isSelfPublished(g.developer, g.publisher)
       );
 
@@ -205,7 +214,7 @@ async function main() {
     } else if (!process.env.ANTHROPIC_API_KEY) {
       console.log('  ANTHROPIC_API_KEY not set, skipping contact research\n');
     } else {
-      console.log('  No enriched games to research\n');
+      console.log('  No games need contact research\n');
     }
 
     // Step 5: Send email notification
