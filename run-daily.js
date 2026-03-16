@@ -198,8 +198,10 @@ async function main() {
               updateWatchlistContact(game.title, displayContact);
             } else if (!contactInfo.selfPublished) {
               console.log(`    Not self-published: ${game.title}`);
+              updateWatchlistContact(game.title, 'Not indie');
             } else {
               console.log(`    No contact info found for: ${game.title}`);
+              updateWatchlistContact(game.title, 'Could not find');
             }
 
             // Rate limiting for Claude API
