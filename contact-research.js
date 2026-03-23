@@ -45,20 +45,24 @@ I need you to determine two things:
    - Check if they received significant funding from or are publishing through a larger entity
    - A studio is self-published ONLY if they are genuinely independent with no major corporate parent or investor
    - Major publishers like Square Enix, SEGA, EA, Ubisoft, Capcom, Bandai Namco, etc. are NOT self-published
-   - If you cannot determine ownership with confidence, mark as NOT self-published
+   - Small investment rounds or grants do NOT disqualify a studio — only count as NOT indie if there is a major corporate publisher or parent company
+   - If you cannot find clear evidence of corporate ownership, assume they ARE self-published (default to indie)
 
 2. CONTACT RESEARCH (only if truly self-published):
    Find the best way to contact the developer. Search in this priority order:
    a. Personal email of the CEO, founder, or co-founder
    b. LinkedIn profile URL of the CEO, founder, or co-founder
    c. General studio contact email (e.g., contact@studio.com, hello@studio.com)
-   d. Email or LinkedIn of another key team member
-   e. Discord server invite link
+   d. Twitter/X profile of the founder or studio (@handle URL)
+   e. Email or LinkedIn of another key team member
+   f. Discord server invite link
+   g. itch.io page URL
 
-   Look at the studio's official website, social media, press kits, and LinkedIn pages.
+   Search the studio's official website, Steam store page, Twitter/X, LinkedIn, itch.io, and press kits.
+   Also search for "[developer name] contact" and "[developer name] founder email".
 
 You MUST respond in EXACTLY this JSON format with no other text, no markdown, no code fences:
-{"selfPublished": true, "reasoning": "brief explanation of why self-published or not", "contactMethod": "the actual contact info found or -", "contactType": "founder_email|linkedin|studio_email|member_email|discord|none", "personName": "Full Name of the person if applicable, or empty string"}
+{"selfPublished": true, "reasoning": "brief explanation of why self-published or not", "contactMethod": "the actual contact info found or -", "contactType": "founder_email|linkedin|studio_email|twitter|member_email|discord|itchio|none", "personName": "Full Name of the person if applicable, or empty string"}
 
 If NOT self-published, use:
 {"selfPublished": false, "reasoning": "brief explanation", "contactMethod": "-", "contactType": "none", "personName": ""}`;
@@ -130,7 +134,7 @@ If NOT self-published, use:
 
   } catch (error) {
     console.error(`  Contact research failed for ${title}: ${error.message}`);
-    return { selfPublished: false, contactMethod: '-', contactType: 'none', personName: '' };
+    return { selfPublished: false, contactMethod: '-', contactType: 'none', personName: '', error: true };
   }
 }
 

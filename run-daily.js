@@ -179,6 +179,11 @@ async function main() {
         isSelfPublished(g.developer, g.publisher)
       );
 
+      const skipped = gamesNeedingContact.filter(g => !isSelfPublished(g.developer, g.publisher));
+      if (skipped.length > 0) {
+        console.log(`  Skipped by dev/pub mismatch (${skipped.length}): ${skipped.map(g => `${g.title} (${g.developer} / ${g.publisher})`).join(', ')}\n`);
+      }
+
       if (selfPublishedCandidates.length > 0) {
         const maxLookups = parseInt(process.env.MAX_CONTACT_LOOKUPS || '10', 10);
         const toResearch = selfPublishedCandidates.slice(0, maxLookups);
@@ -190,7 +195,9 @@ async function main() {
             console.log(`  Researching: ${game.title} (${game.developer})`);
             const contactInfo = await researchContact(game.title, game.developer, game.appId);
 
-            if (contactInfo.selfPublished && contactInfo.contactMethod !== '-') {
+            if (contactInfo.error) {
+              console.log(`    API error, skipping write for: ${game.title}`);
+            } else if (contactInfo.selfPublished && contactInfo.contactMethod !== '-') {
               const displayContact = contactInfo.personName
                 ? `${contactInfo.personName}: ${contactInfo.contactMethod}`
                 : contactInfo.contactMethod;
