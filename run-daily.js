@@ -169,24 +169,43 @@ async function main() {
     console.log(`  Watchlist games found: ${watchlistGames.length}`);
 
     // Only research games that don't already have contact info
-    const gamesNeedingContact = watchlistGames.filter(g =>
-      g.contact === '-' && g.developer !== 'Unknown' && g.publisher !== 'Unknown'
-    );
+    const gamesNeedingContact = watchlistGames.filter(g => g.contact === '-');
     console.log(`  Games needing contact research: ${gamesNeedingContact.length}`);
 
-    if (gamesNeedingContact.length > 0 && process.env.ANTHROPIC_API_KEY) {
-      const selfPublishedCandidates = gamesNeedingContact.filter(g =>
+    // Label games with missing enrichment data
+    const missingEnrichment = gamesNeedingContact.filter(g => g.developer === 'Unknown' || g.publisher === 'Unknown');
+    for (const game of missingEnrichment) {
+      updateWatchlistContact(game.title, 'No dev info');
+    }
+    if (missingEnrichment.length > 0) {
+      console.log(`  Marked ${missingEnrichment.length} games with missing dev/pub info\n`);
+    }
+
+    const enrichedGames = gamesNeedingContact.filter(g => g.developer !== 'Unknown' && g.publisher !== 'Unknown');
+
+    if (enrichedGames.length > 0 && process.env.ANTHROPIC_API_KEY) {
+      const selfPublishedCandidates = enrichedGames.filter(g =>
         isSelfPublished(g.developer, g.publisher)
       );
 
-      const skipped = gamesNeedingContact.filter(g => !isSelfPublished(g.developer, g.publisher));
-      if (skipped.length > 0) {
-        console.log(`  Skipped by dev/pub mismatch (${skipped.length}): ${skipped.map(g => `${g.title} (${g.developer} / ${g.publisher})`).join(', ')}\n`);
+      // Label games where dev != pub (has a separate publisher)
+      const hasPublisher = enrichedGames.filter(g => !isSelfPublished(g.developer, g.publisher));
+      for (const game of hasPublisher) {
+        updateWatchlistContact(game.title, `Has publisher (${game.publisher})`);
+      }
+      if (hasPublisher.length > 0) {
+        console.log(`  Marked ${hasPublisher.length} games with separate publisher\n`);
       }
 
       if (selfPublishedCandidates.length > 0) {
         const maxLookups = parseInt(process.env.MAX_CONTACT_LOOKUPS || '10', 10);
         const toResearch = selfPublishedCandidates.slice(0, maxLookups);
+
+        // Label any self-published games beyond the lookup limit
+        const deferredGames = selfPublishedCandidates.slice(maxLookups);
+        for (const game of deferredGames) {
+          updateWatchlistContact(game.title, 'Pending research');
+        }
 
         console.log(`  Found ${selfPublishedCandidates.length} potentially self-published games (researching up to ${maxLookups})\n`);
 
@@ -196,7 +215,8 @@ async function main() {
             const contactInfo = await researchContact(game.title, game.developer, game.appId);
 
             if (contactInfo.error) {
-              console.log(`    API error, skipping write for: ${game.title}`);
+              console.log(`    API error for: ${game.title}`);
+              updateWatchlistContact(game.title, 'Research error');
             } else if (contactInfo.selfPublished && contactInfo.contactMethod !== '-') {
               const displayContact = contactInfo.personName
                 ? `${contactInfo.personName}: ${contactInfo.contactMethod}`
@@ -215,6 +235,7 @@ async function main() {
             await new Promise(r => setTimeout(r, 3000));
           } catch (e) {
             console.error(`  Contact research failed for ${game.title}: ${e.message}`);
+            updateWatchlistContact(game.title, 'Research error');
           }
         }
       } else {
