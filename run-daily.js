@@ -190,22 +190,24 @@ async function main() {
             console.log(`  Researching: ${game.title} (${game.developer})`);
             const contactInfo = await researchContact(game.title, game.developer, game.appId);
 
-            if (contactInfo.selfPublished && contactInfo.contactMethod !== '-') {
-              const displayContact = contactInfo.personName
+            let displayContact;
+            if (contactInfo.contactMethod !== '-') {
+              displayContact = contactInfo.personName
                 ? `${contactInfo.personName}: ${contactInfo.contactMethod}`
                 : contactInfo.contactMethod;
-
-              updateWatchlistContact(game.title, displayContact);
             } else if (!contactInfo.selfPublished) {
-              console.log(`    Not self-published: ${game.title}`);
+              displayContact = `Not indie: ${contactInfo.reasoning || 'not self-published'}`;
             } else {
-              console.log(`    No contact info found for: ${game.title}`);
+              displayContact = 'No contact found';
             }
+
+            updateWatchlistContact(game.title, displayContact);
 
             // Rate limiting for Claude API
             await new Promise(r => setTimeout(r, 3000));
           } catch (e) {
             console.error(`  Contact research failed for ${game.title}: ${e.message}`);
+            updateWatchlistContact(game.title, 'Research failed');
           }
         }
       } else {

@@ -47,7 +47,7 @@ I need you to determine two things:
    - Major publishers like Square Enix, SEGA, EA, Ubisoft, Capcom, Bandai Namco, etc. are NOT self-published
    - If you cannot determine ownership with confidence, mark as NOT self-published
 
-2. CONTACT RESEARCH (only if truly self-published):
+2. CONTACT RESEARCH (regardless of self-publishing status):
    Find the best way to contact the developer. Search in this priority order:
    a. Personal email of the CEO, founder, or co-founder
    b. LinkedIn profile URL of the CEO, founder, or co-founder
@@ -60,8 +60,8 @@ I need you to determine two things:
 You MUST respond in EXACTLY this JSON format with no other text, no markdown, no code fences:
 {"selfPublished": true, "reasoning": "brief explanation of why self-published or not", "contactMethod": "the actual contact info found or -", "contactType": "founder_email|linkedin|studio_email|member_email|discord|none", "personName": "Full Name of the person if applicable, or empty string"}
 
-If NOT self-published, use:
-{"selfPublished": false, "reasoning": "brief explanation", "contactMethod": "-", "contactType": "none", "personName": ""}`;
+If NOT self-published, still search for contacts and use:
+{"selfPublished": false, "reasoning": "brief explanation", "contactMethod": "the actual contact info found or -", "contactType": "founder_email|linkedin|studio_email|member_email|discord|none", "personName": "Full Name of the person if applicable, or empty string"}`;
 
   try {
     console.log(`    Calling Claude API for: ${title}`);
@@ -125,7 +125,8 @@ If NOT self-published, use:
       selfPublished: result.selfPublished === true,
       contactMethod: result.contactMethod || '-',
       contactType: result.contactType || 'none',
-      personName: result.personName || ''
+      personName: result.personName || '',
+      reasoning: result.reasoning || ''
     };
 
   } catch (error) {
