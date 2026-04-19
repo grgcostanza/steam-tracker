@@ -174,49 +174,62 @@ async function main() {
     );
     console.log(`  Games needing contact research: ${gamesNeedingContact.length}`);
 
-    if (gamesNeedingContact.length > 0 && process.env.ANTHROPIC_API_KEY) {
-      const selfPublishedCandidates = gamesNeedingContact.filter(g =>
-        isSelfPublished(g.developer, g.publisher)
-      );
+    const selfPublishedCandidates = gamesNeedingContact.filter(g =>
+      isSelfPublished(g.developer, g.publisher)
+    );
 
-      if (selfPublishedCandidates.length > 0) {
-        const maxLookups = parseInt(process.env.MAX_CONTACT_LOOKUPS || '10', 10);
-        const toResearch = selfPublishedCandidates.slice(0, maxLookups);
+    if (selfPublishedCandidates.length > 0 && process.env.ANTHROPIC_API_KEY) {
+      const maxLookups = parseInt(process.env.MAX_CONTACT_LOOKUPS || '10', 10);
+      const toResearch = selfPublishedCandidates.slice(0, maxLookups);
 
-        console.log(`  Found ${selfPublishedCandidates.length} potentially self-published games (researching up to ${maxLookups})\n`);
+      console.log(`  Found ${selfPublishedCandidates.length} potentially self-published games (researching up to ${maxLookups})\n`);
 
-        for (const game of toResearch) {
-          try {
-            console.log(`  Researching: ${game.title} (${game.developer})`);
-            const contactInfo = await researchContact(game.title, game.developer, game.appId);
+      for (const game of toResearch) {
+        try {
+          console.log(`  Researching: ${game.title} (${game.developer})`);
+          const contactInfo = await researchContact(game.title, game.developer, game.appId);
 
-            let displayContact;
-            if (contactInfo.contactMethod !== '-') {
-              displayContact = contactInfo.personName
-                ? `${contactInfo.personName}: ${contactInfo.contactMethod}`
-                : contactInfo.contactMethod;
-            } else if (!contactInfo.selfPublished) {
-              displayContact = `Not indie: ${contactInfo.reasoning || 'not self-published'}`;
-            } else {
-              displayContact = 'No contact found';
-            }
-
-            updateWatchlistContact(game.title, displayContact);
-
-            // Rate limiting for Claude API
-            await new Promise(r => setTimeout(r, 3000));
-          } catch (e) {
-            console.error(`  Contact research failed for ${game.title}: ${e.message}`);
-            updateWatchlistContact(game.title, 'Research failed');
+          let displayContact;
+          if (contactInfo.researchFailed) {
+            displayContact = `Research failed: ${contactInfo.reasoning || 'API error'}`;
+          } else if (contactInfo.contactMethod !== '-') {
+            displayContact = contactInfo.personName
+              ? `${contactInfo.personName}: ${contactInfo.contactMethod}`
+              : contactInfo.contactMethod;
+          } else if (!contactInfo.selfPublished) {
+            displayContact = `Not indie: ${contactInfo.reasoning || 'not self-published'}`;
+          } else {
+            displayContact = contactInfo.reasoning
+              ? `No contact found: ${contactInfo.reasoning}`
+              : 'No contact found';
           }
+
+          updateWatchlistContact(game.title, displayContact);
+
+          // Rate limiting for Claude API
+          await new Promise(r => setTimeout(r, 3000));
+        } catch (e) {
+          console.error(`  Contact research failed for ${game.title}: ${e.message}`);
+          updateWatchlistContact(game.title, `Research failed: ${e.message}`);
         }
-      } else {
-        console.log('  No self-published candidates found\n');
       }
     } else if (!process.env.ANTHROPIC_API_KEY) {
       console.log('  ANTHROPIC_API_KEY not set, skipping contact research\n');
-    } else {
-      console.log('  No games need contact research\n');
+    } else if (selfPublishedCandidates.length === 0) {
+      console.log('  No self-published candidates found\n');
+    }
+
+    // Guarantee every self-published-looking game has an explanation
+    // rather than a bare "-" (covers API-key-missing, max-lookup overflow,
+    // and any silent skips).
+    const postSweep = getWatchlistGames();
+    for (const game of postSweep) {
+      if (game.contact === '-' && isSelfPublished(game.developer, game.publisher)) {
+        const reason = process.env.ANTHROPIC_API_KEY
+          ? 'Needs manual review (research queue overflow)'
+          : 'Needs manual review (ANTHROPIC_API_KEY not set)';
+        updateWatchlistContact(game.title, reason);
+      }
     }
 
     // Step 5: Send email notification
