@@ -48,20 +48,20 @@ I need you to determine two things:
    - If you cannot determine ownership with confidence, mark as NOT self-published
 
 2. CONTACT RESEARCH (regardless of self-publishing status):
-   Find the best way to contact the developer. Search in this priority order:
-   a. Personal email of the CEO, founder, or co-founder
-   b. LinkedIn profile URL of the CEO, founder, or co-founder
-   c. General studio contact email (e.g., contact@studio.com, hello@studio.com)
-   d. Email or LinkedIn of another key team member
-   e. Discord server invite link
+   Find the best way to contact the developer. Search in this STRICT priority order and return the HIGHEST-tier contact you can verify. Do NOT return a lower tier if a higher tier is available:
+   1. Personal/individual email of the CEO or founder (or co-founder)
+   2. LinkedIn profile URL of the CEO or founder (or co-founder)
+   3. Twitter/X profile URL of the CEO or founder (or co-founder)
+   4. General company/studio email (e.g., contact@studio.com, hello@studio.com, press@studio.com)
+   5. Discord server invite link
 
    Look at the studio's official website, social media, press kits, and LinkedIn pages.
 
 You MUST respond in EXACTLY this JSON format with no other text, no markdown, no code fences:
-{"selfPublished": true, "reasoning": "brief explanation of why self-published or not", "contactMethod": "the actual contact info found or -", "contactType": "founder_email|linkedin|studio_email|member_email|discord|none", "personName": "Full Name of the person if applicable, or empty string"}
+{"selfPublished": true, "reasoning": "brief explanation of why self-published or not", "contactMethod": "the actual contact info found or -", "contactType": "founder_email|linkedin|twitter|studio_email|discord|none", "personName": "Full Name of the person if applicable, or empty string"}
 
 If NOT self-published, still search for contacts and use:
-{"selfPublished": false, "reasoning": "brief explanation", "contactMethod": "the actual contact info found or -", "contactType": "founder_email|linkedin|studio_email|member_email|discord|none", "personName": "Full Name of the person if applicable, or empty string"}`;
+{"selfPublished": false, "reasoning": "brief explanation", "contactMethod": "the actual contact info found or -", "contactType": "founder_email|linkedin|twitter|studio_email|discord|none", "personName": "Full Name of the person if applicable, or empty string"}`;
 
   try {
     console.log(`    Calling Claude API for: ${title}`);
@@ -131,7 +131,14 @@ If NOT self-published, still search for contacts and use:
 
   } catch (error) {
     console.error(`  Contact research failed for ${title}: ${error.message}`);
-    return { selfPublished: false, contactMethod: '-', contactType: 'none', personName: '' };
+    return {
+      selfPublished: false,
+      contactMethod: '-',
+      contactType: 'none',
+      personName: '',
+      researchFailed: true,
+      reasoning: `API error: ${error.message}`
+    };
   }
 }
 
