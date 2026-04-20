@@ -25,6 +25,71 @@ export function isSelfPublished(developer, publisher) {
 }
 
 /**
+ * Cheap first-pass classifier using Claude Haiku (no web search).
+ * Decides whether a studio is a major/AAA publisher we should SKIP,
+ * a genuine indie worth researching, or unknown (fall through to research).
+ *
+ * Returns: { classification: 'major' | 'indie' | 'unknown', reasoning: string }
+ */
+export async function classifyStudio(developer, publisher) {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    return { classification: 'unknown', reasoning: '' };
+  }
+
+  const studioName = developer || publisher;
+  const prompt = `Classify the game studio "${studioName}" (publisher: "${publisher}") as one of:
+- "major" — a large/AAA publisher, public company, platform holder, or a well-known mid-size publisher. Examples: Capcom, Square Enix, SEGA, EA, Ubisoft, Bandai Namco, Konami, Activision, Blizzard, Take-Two, 2K, Rockstar, Nintendo, Sony, Microsoft / Xbox Game Studios, Valve, Epic Games, Riot, Tencent, NetEase, Nexon, Krafton, Embracer, THQ Nordic, Paradox, CD Projekt, Devolver Digital, tinyBuild, Annapurna Interactive, Playstack, Hooded Horse, Raw Fury, Focus Entertainment, 505 Games, Team17, Kepler, Kwalee, Fireshine, Shiro Unlimited, Saber Interactive, miHoYo/HoYoverse, NCsoft, Gameforge, Wargaming, Com2uS, Netmarble, Smilegate. Also "major" if the studio is a well-known AAA developer with hundreds of employees (IO Interactive, FromSoftware, Remedy, Arkane, Respawn, Obsidian, inXile, Larian, Kojima Productions, Bungie, 343, etc.) or a subsidiary of any of the above.
+- "indie" — a small independent developer that is not any of the above, with no major corporate parent or investor.
+- "unknown" — you cannot tell with confidence from the name alone.
+
+Respond in EXACTLY this JSON format with no other text, no markdown, no code fences:
+{"classification": "major|indie|unknown", "reasoning": "one short sentence"}`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 200,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`    Classify API error ${response.status}: ${errorText.substring(0, 200)}`);
+      return { classification: 'unknown', reasoning: '' };
+    }
+
+    const data = await response.json();
+    const textBlocks = data.content.filter(b => b.type === 'text');
+    if (textBlocks.length === 0) return { classification: 'unknown', reasoning: '' };
+
+    const jsonMatch = textBlocks[textBlocks.length - 1].text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return { classification: 'unknown', reasoning: '' };
+
+    const result = JSON.parse(jsonMatch[0]);
+    const classification = ['major', 'indie', 'unknown'].includes(result.classification)
+      ? result.classification
+      : 'unknown';
+
+    return {
+      classification,
+      reasoning: result.reasoning || ''
+    };
+  } catch (error) {
+    console.error(`  Classify failed for ${studioName}: ${error.message}`);
+    return { classification: 'unknown', reasoning: '' };
+  }
+}
+
+/**
  * Call Claude API with web search to verify self-publishing status and find contact info.
  *
  * Returns: { selfPublished: boolean, contactMethod: string, personName: string }
