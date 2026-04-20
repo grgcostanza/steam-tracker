@@ -1,6 +1,6 @@
 import { scrapeTop200, scrapeGameDetails } from './scraper.js';
 import { sendNotification } from './email-notify.js';
-import { isSelfPublished, researchContact, updateWatchlistContact, getWatchlistGames } from './contact-research.js';
+import { isSelfPublished, classifyStudio, researchContact, updateWatchlistContact, getWatchlistGames } from './contact-research.js';
 import { spawn } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -179,10 +179,31 @@ async function main() {
     );
 
     if (selfPublishedCandidates.length > 0 && process.env.ANTHROPIC_API_KEY) {
-      const maxLookups = parseInt(process.env.MAX_CONTACT_LOOKUPS || '10', 10);
-      const toResearch = selfPublishedCandidates.slice(0, maxLookups);
+      // Pre-filter with cheap Haiku classifier so major publishers
+      // (Capcom, Valve, Nexon, IO Interactive, KONAMI, etc.) don't
+      // consume expensive research slots.
+      console.log(`  Pre-classifying ${selfPublishedCandidates.length} candidates with Haiku...\n`);
+      const indieCandidates = [];
+      for (const game of selfPublishedCandidates) {
+        try {
+          const { classification, reasoning } = await classifyStudio(game.developer, game.publisher);
+          console.log(`    ${game.title} (${game.developer}) -> ${classification}${reasoning ? `: ${reasoning}` : ''}`);
+          if (classification === 'major') {
+            updateWatchlistContact(game.title, `Not indie: ${reasoning || 'major publisher'}`);
+          } else {
+            indieCandidates.push(game);
+          }
+          await new Promise(r => setTimeout(r, 300));
+        } catch (e) {
+          console.error(`    Classify failed for ${game.title}: ${e.message}`);
+          indieCandidates.push(game);
+        }
+      }
 
-      console.log(`  Found ${selfPublishedCandidates.length} potentially self-published games (researching up to ${maxLookups})\n`);
+      const maxLookups = parseInt(process.env.MAX_CONTACT_LOOKUPS || '30', 10);
+      const toResearch = indieCandidates.slice(0, maxLookups);
+
+      console.log(`\n  ${indieCandidates.length} indie/unknown candidates after pre-filter (researching up to ${maxLookups})\n`);
 
       for (const game of toResearch) {
         try {
